@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Sản phẩm - Y học Classic</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: "Times New Roman", serif;
+      background-color: #f4f0e6;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #5a3e2b;
+      color: #fff;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      max-width: 900px;
+      background-color: #fffefb;
+      margin: 40px auto;
+      padding: 25px 40px;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      color: #4b382a;
+      border-bottom: 2px solid #d4b483;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    form {
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #3a2f1f;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 4px;
+    }
+
+    .btn-group {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background-color: #d4b483;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #c49b66;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e9decf;
+    }
+
+    #search-box {
+      width: 300px;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<header>💊 Quản Lý Sản Phẩm Y Học Classic 💊</header>
+
+<div class="container">
+  <h2>Nhập thông tin Sản phẩm</h2>
+
+  <form id="productForm">
+    <label for="tenSP">Tên sản phẩm:</label>
+    <input type="text" id="tenSP" required>
+
+    <label for="giaBan">Giá bán:</label>
+    <input type="number" id="giaBan" required>
+
+    <label for="giaGiam">Giá giảm:</label>
+    <input type="number" id="giaGiam">
+
+    <label for="danhMuc">Danh mục:</label>
+    <select id="danhMuc">
+      <option value="">-- Chọn danh mục --</option>
+      <option>Thuốc bổ</option>
+      <option>Giảm đau</option>
+      <option>Kháng sinh</option>
+    </select>
+
+    <label for="donViTinh">Đơn vị tính:</label>
+    <select id="donViTinh">
+      <option value="">-- Chọn đơn vị --</option>
+      <option>Viên</option>
+      <option>Chai</option>
+      <option>Hộp</option>
+    </select>
+
+    <div class="btn-group">
+      <button type="button" id="btnAdd">Thêm</button>
+      <button type="button" id="btnUpdate">Sửa</button>
+      <button type="button" id="btnDelete">Xóa</button>
+      <input type="text" id="search-box" placeholder="🔍 Tìm kiếm sản phẩm...">
+    </div>
+  </form>
+
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tên sản phẩm</th>
+        <th>Giá bán</th>
+        <th>Giá giảm</th>
+        <th>Danh mục</th>
+        <th>Đơn vị</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+$(document).ready(function() {
+  let products = [];
+  let editIndex = -1;
+
+  function renderTable() {
+    const tbody = $("#productTable tbody");
+    tbody.empty();
+    products.forEach((p, i) => {
+      tbody.append(`
+        <tr data-index="${i}">
+          <td>${i + 1}</td>
+          <td>${p.tenSP}</td>
+          <td>${p.giaBan}</td>
+          <td>${p.giaGiam}</td>
+          <td>${p.danhMuc}</td>
+          <td>${p.donViTinh}</td>
+        </tr>
+      `);
+    });
+  }
+
+  $("#btnAdd").click(function() {
+    const newProduct = {
+      tenSP: $("#tenSP").val(),
+      giaBan: $("#giaBan").val(),
+      giaGiam: $("#giaGiam").val(),
+      danhMuc: $("#danhMuc").val(),
+      donViTinh: $("#donViTinh").val(),
+    };
+
+    if (!newProduct.tenSP || !newProduct.giaBan) {
+      alert("Vui lòng nhập đủ thông tin!");
+      return;
+    }
+
+    products.push(newProduct);
+    renderTable();
+    $("form")[0].reset();
+  });
+
+  $("#btnUpdate").click(function() {
+    if (editIndex === -1) {
+      alert("Chọn sản phẩm cần sửa trong bảng!");
+      return;
+    }
+
+    products[editIndex] = {
+      tenSP: $("#tenSP").val(),
+      giaBan: $("#giaBan").val(),
+      giaGiam: $("#giaGiam").val(),
+      danhMuc: $("#danhMuc").val(),
+      donViTinh: $("#donViTinh").val(),
+    };
+
+    renderTable();
+    editIndex = -1;
+    $("form")[0].reset();
+  });
+
+  $("#btnDelete").click(function() {
+    if (editIndex === -1) {
+      alert("Chọn sản phẩm cần xóa!");
+      return;
+    }
+    products.splice(editIndex, 1);
+    renderTable();
+    editIndex = -1;
+    $("form")[0].reset();
+  });
+
+  $("#productTable").on("click", "tr", function() {
+    const index = $(this).data("index");
+    const p = products[index];
+    editIndex = index;
+    $("#tenSP").val(p.tenSP);
+    $("#giaBan").val(p.giaBan);
+    $("#giaGiam").val(p.giaGiam);
+    $("#danhMuc").val(p.danhMuc);
+    $("#donViTinh").val(p.donViTinh);
+  });
+
+  $("#search-box").on("keyup", function() {
+    const keyword = $(this).val().toLowerCase();
+    $("#productTable tbody tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(keyword) > -1);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
